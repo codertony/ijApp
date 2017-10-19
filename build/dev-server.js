@@ -23,6 +23,13 @@ var autoOpenBrowser = !!config.dev.autoOpenBrowser
 var proxyTable = config.dev.proxyTable
 
 var app = express()
+
+var weixinApi = require('./server-api/weixinApi')
+var ijweixinApi = require('./server-api/ij-weixinApi')
+
+app.use('/oauth', weixinApi)
+app.use('/ij', ijweixinApi)
+
 var compiler = webpack(webpackConfig)
 
 var devMiddleware = require('webpack-dev-middleware')(compiler, {
@@ -64,7 +71,10 @@ app.use(hotMiddleware)
 var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
 app.use(staticPath, express.static('./static'))
 
-var uri = 'http://localhost:' + port
+// var uri = 'http://localhost:' + port
+var host = 'localhost'
+// var host = '10.10.106.37'
+var uri = 'http://' + host + ':' + port
 
 var _resolve
 var readyPromise = new Promise(resolve => {

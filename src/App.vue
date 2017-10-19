@@ -1,19 +1,34 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
+  <div id="app" class="appContent">
+    <keep-alive>
+      <router-view name="home"></router-view>
+    </keep-alive>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'app'
-}
+<script >
+  export default {
+    name: 'app',
+    data () {
+      return {
+      }
+    },
+    methods: {
+    }
+  }
 </script>
 
-<style lang="less">
-@import '~vux/src/styles/reset.less';
-
-body {
-  background-color: #fbf9fe;
-}
+<style lang="less" rel="stylesheet/less">
+  @import '~vux/src/styles/reset.less';
+  @import 'common/css/ijStyle/index.less';
+  
+  .appContent{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+  }
 </style>
