@@ -2,6 +2,9 @@ import MOCK from 'mockjs'
 import APIS from './APIS'
 
 export default function(apiEvn, urlFragment) {
+  MOCK.setup({
+    timeout: '500-1000'
+  })
   var APIEVN = apiEvn || 'web'
   var URLFRAGMENT = urlFragment || ''
   if (APIEVN === 'web') {

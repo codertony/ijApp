@@ -1,3 +1,5 @@
+import Mock from 'mockjs'
+
 export default [
   {url: '/test',
     type: 'get',
@@ -22,6 +24,26 @@ export default [
           'county': '@county(true)'
         }
       ]
+    }
+  },
+  {url: '/getAddress',
+    template: function(options) {
+      var params = JSON.parse(options.body)
+      var addr = params.address || ''
+      return Mock.mock({
+        'objArr|6-10': [
+          {
+            'info': [{
+              'label': '物业地址',
+              'value': '@county(true) ' + addr,
+              'test': function() {
+                return JSON.stringify(params)
+              }
+            }],
+            'id': '@guid'
+          }
+        ]
+      })
     }
   }
 ]

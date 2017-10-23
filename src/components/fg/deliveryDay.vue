@@ -1,24 +1,25 @@
 <template>
   <transition name="fade">
     <div class="deliveryDayList">
-      <search @on-submit="onSubmit" :auto-fixed="autoFixed" @on-focus="onFocus" @on-cancel="onCancel"></search>
-      <ij-scroll :data="list">
-        <div class="form-list">
-          <group>
-            <cell-form-preview :list="list"></cell-form-preview>
-            <vux-form-btn-group :buttons="buttons2" :data="list" v-show="1"></vux-form-btn-group>
-          </group>
-          <br>
-          <form-preview :header-label="('付款金额')" header-value="¥2400.00" :body-items="list" :footer-buttons="buttons1"></form-preview>
-          <br>
-        </div>
-      </ij-scroll>
+      <search ref="search" :value="addr" @on-submit="onSubmit" @on-change="onChange" placeholder="物业地址" :auto-fixed="autoFixed" @on-focus="onFocus" @on-cancel="onCancel"></search>
+      <div class="form-list">
+        <ij-scroll ref="scroll" :data="list" @pullingDown="scrollPullDown" @pullingUp="ScrollPullUpLoad" :pullDownRefresh="scroll.pullDown" :pullUpLoad="scroll.pullUp">
+          <div>
+            <br>
+            <template v-for="form,index in list">
+              <form-preview v-show="!form.hide" :header-label="form.info[0].label" :header-value="form.info[0].value" :body-items="form.info" :footer-buttons="buttons2" :name="index"></form-preview>
+              <br v-show="!form.hide">
+            </template>
+          </div>
+        </ij-scroll>
+      </div>
+     
       <div v-transfer-dom>
         <popup v-model="datePopup" height="400px" is-transparent>
           <div style="width: 95%;background-color:#fff;height:380px;margin:0 auto;border-radius:5px;padding-top:10px;z-index: 510">
             <datetime-view v-model="inputDate" ref="datetime"></datetime-view>
             <div style="padding:5px 15px 15px;">
-              <x-button type="primary">确定交割日</x-button>
+              <x-button type="primary" @click.native="deliveryDay()" >确定交割日</x-button>
               <x-button @click.native="datePopup = false">取消</x-button>
             </div>
           </div>
@@ -34,94 +35,102 @@
     FormPreview,
     Search,
     Group,
-    Cell,
-    CellBox,
-    CellFormPreview,
     Popup,
     XButton,
-    XSwitch,
     DatetimeView
   } from 'vux'
-  import vuxFormBtnGroup from 'base/vuxFormBtnGroup/vuxFormBtnGroup.vue'
   export default {
     directives: {
       TransferDom
     },
     components: {
-      vuxFormBtnGroup,
       FormPreview,
       Search,
       Group,
-      Cell,
-      CellBox,
-      CellFormPreview,
       Popup,
       XButton,
-      XSwitch,
       DatetimeView
     },
     data () {
       return {
+        scroll: {
+          pullDown: true,
+          pullUp: true
+        },
+        changeIndex: -1,
+        addr: '',
+        inputDate: '',
         datePopup: false,
         results: [],
         autoFixed: false,
         value: '',
         value1: 'hello',
         value2: 'vux',
-        list: [{
-          label: '商品',
-          value: '电动打蛋机'
-        }, {
-          label: '标题标题',
-          value: '名字名字名字'
-        }, {
-          label: '标题标题',
-          value: '很长很长的名字很长很长的名字很长很长的名字很长很长的名字很长很长的名字'
-        }],
-        buttons1: [{
-          style: 'default',
-          text: '辅助操作'
-        }, {
-          style: 'primary',
-          text: '跳转到首页',
-          link: '/'
-        }],
+        list: [
+        ],
         buttons2: [{
           style: 'primary',
           text: '我要交割',
-          onButtonClick: (test) => {
+          onButtonClick: (arg) => {
             this.datePopup = true
+            this.changeIndex = arg
           }
         }]
       }
     },
     methods: {
-      resultClick (item) {
-        window.alert('you click the result item: ' + JSON.stringify(item))
+      deliveryDay() {
+        let changeItem = this.list[this.changeIndex]
+        changeItem.hide = true
+        alert(changeItem.id)
+        this.datePopup = false
       },
-      getResult (val) {
-        this.results = val ? getResult(this.value) : []
+      onChange(val) {
+        this.addr = val
       },
       onSubmit (val) {
-        window.alert('on submit' + val)
+        var that = this
+        this.searchAddr(this.addr).then(function(data) {
+          that.list = data.data.objArr
+        })
+        this.$refs.search.setBlur()
+      },
+      searchAddr (addr) {
+        var params = addr ? {address: addr} : {}
+        return this.axios.get('api/getAddress', {data: params})
       },
       onCancel () {
         console.log('on cancel')
       },
       onFocus () {
         console.log('on focus')
+      },
+      scrollPullDown: function () {
+        var that = this
+        this.searchAddr(this.addr).then(function(data) {
+          that.list = data.data.objArr
+        }).catch(function() {
+          this.$refs.scroll.forceUpdate()
+        })
+      },
+      ScrollPullUpLoad: function (a) {
+        var that = this
+        this.searchAddr(this.addr).then(function(data) {
+          console.log(data)
+          that.list = that.list.concat(data.data.objArr)
+        }).catch(function() {
+          that.$refs.scroll.forceUpdate()
+        })
       }
-    }
-  }
-  function getResult (val) {
-    let rs = []
-    for (let i = 0; i < 8; i++) {
-      rs.push({
-        title: `${val} result: ${i + 1} `,
-        other: i
+    },
+    created() {
+      var that = this
+      this.searchAddr(this.addr).then(function(data) {
+        that.list = data.data.objArr
+        that.scroll.pullDown = true
+        that.scroll.pullUp = true
       })
     }
-    return rs
   }
 </script>
 
@@ -130,7 +139,9 @@
     height: 100%;
   }
   .form-list{
-    padding-top: 40px;
-    padding-bottom: 10px;
+    position: absolute;
+    top: 40px;
+    bottom: 0;
+    width: 100%;
   }
 </style>

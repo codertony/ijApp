@@ -20,12 +20,12 @@ var getToken = function (callBack) {
     function (error, response, body) {
       if (response.statusCode === 200) {
         // 第三步：拉取用户信息(需scope为 snsapi_userinfo)
-        //console.log(JSON.parse(body));
-        var data = JSON.parse(body);
-        access_token = data.access_token;
+        // console.log(JSON.parse(body));
+        var data = JSON.parse(body)
+        access_token = data.access_token
         callBack && callBack()
       } else {
-        console.log(response.statusCode);
+        console.log(response.statusCode)
       }
     }
   )
@@ -102,7 +102,7 @@ router.get('/getUserInfo', function (req, res, next) {
 				<p>" + userinfo.department + "，" + userinfo.position + "，" + userinfo.gender + "</p>"); */
           res.json(userinfo)
         } else {
-          console.log(response.statusCode);
+          console.log(response.statusCode)
         }
       } else {
         res.json({

@@ -4,13 +4,14 @@
       <group>
         <cell is-link>
           <span slot="title">
-            杨天宇
+            {{userInfo.name}}
             <br>
             <span>
-              test
+              <span style="color: rgba(0, 0, 0, .87)">{{userInfo.position}} -</span>
+				{{userInfo.mobile}}
             </span>
           </span>
-          <img slot="icon" width="50" style="display:block;margin-right:5px;" src="http://img0.imgtn.bdimg.com/it/u=458432720,3241772013&fm=214&gp=0.jpg">
+          <img slot="icon" width="50" style="display:block;margin-right:5px;" :src="userInfo.avatar">
         </cell>
         <cell :title="('My Account')" :value="('Protected')" @click.native="onClick"></cell>
         <cell :title="('Money')" @click.native="onClick" :is-loading="!money" :value="money"></cell>
@@ -116,10 +117,22 @@
     methods: {
       onClick () {
         console.log('on click')
+      },
+      _getUserInfo: function () {
+        let that = this
+        this.axios.get('ij/getUserInfo?userId=' + that.GLOBAL.userId).then((req) => {
+          if (req.data.name) this.userInfo = req.data
+        }).catch((error) => console.log(error))
       }
     },
     data () {
       return {
+        userInfo: {
+          name: '测试',
+          avatar: 'http://img0.imgtn.bdimg.com/it/u=458432720,3241772013&fm=214&gp=0.jpg',
+          position: '地球',
+          mobile: '88888888'
+        },
         list: [{
           label: 'Apple',
           value: '3.29'
@@ -141,6 +154,7 @@
       this.axios.get('api/test').then(function(data) {
         console.log(data.data)
       })
+      this._getUserInfo()
     }
   }
 </script>
