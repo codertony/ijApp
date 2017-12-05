@@ -1,14 +1,18 @@
 <template>
   <transition name="fade">
     <div class="deliveryDayList">
-      <search ref="search" :value="addr" @on-submit="onSubmit" @on-change="onChange" placeholder="物业地址" :auto-fixed="autoFixed" @on-focus="onFocus" @on-cancel="onCancel"></search>
+      <search ref="search" v-model="addr" @on-submit="onSubmit" placeholder="物业地址" :auto-fixed="autoFixed" @on-cancel="onCancel"></search>
       <div class="form-list">
         <ij-scroll ref="scroll" :data="list" @pullingDown="scrollPullDown" @pullingUp="ScrollPullUpLoad" :pullDownRefresh="scroll.pullDown" :pullUpLoad="scroll.pullUp">
           <div>
             <br>
             <template v-for="form,index in list">
-              <form-preview v-show="!form.hide" :header-label="form.info[0].label" :header-value="form.info[0].value" :body-items="form.info" :footer-buttons="buttons2" :name="index"></form-preview>
-              <br v-show="!form.hide">
+              <transition name="fadeLeave">
+                <div v-if="!form.hide">
+                  <form-preview :header-label="form.info[0].label" :header-value="form.info[0].value" :body-items="form.info" :footer-buttons="buttons2" :name="index"></form-preview>
+                  <br >
+                </div>
+              </transition>
             </template>
           </div>
         </ij-scroll>
@@ -81,17 +85,21 @@
     methods: {
       deliveryDay() {
         let changeItem = this.list[this.changeIndex]
-        changeItem.hide = true
         alert(changeItem.id)
+        changeItem.hide = true
         this.datePopup = false
-      },
-      onChange(val) {
-        this.addr = val
+        /* this.$nextTick(() => {
+          setTimeout(() => {
+            this.$delete(this.list, this.changeIndex)
+            this.changeIndex = -1
+            console.log(this.list)
+          }, 550)
+        }) */
+        this.$refs.scroll.forceUpdate()
       },
       onSubmit (val) {
-        var that = this
-        this.searchAddr(this.addr).then(function(data) {
-          that.list = data.data.objArr
+        this.searchAddr(this.addr).then(data => {
+          this.list = data.data.objArr
         })
         this.$refs.search.setBlur()
       },
@@ -102,33 +110,27 @@
       onCancel () {
         console.log('on cancel')
       },
-      onFocus () {
-        console.log('on focus')
-      },
       scrollPullDown: function () {
-        var that = this
-        this.searchAddr(this.addr).then(function(data) {
-          that.list = data.data.objArr
-        }).catch(function() {
+        this.searchAddr(this.addr).then((data) => {
+          this.list = data.data.objArr
+        }).catch(() => {
           this.$refs.scroll.forceUpdate()
         })
       },
       ScrollPullUpLoad: function (a) {
-        var that = this
-        this.searchAddr(this.addr).then(function(data) {
+        this.searchAddr(this.addr).then(data => {
           console.log(data)
-          that.list = that.list.concat(data.data.objArr)
-        }).catch(function() {
-          that.$refs.scroll.forceUpdate()
+          this.list = this.list.concat(data.data.objArr)
+        }).catch(() => {
+          this.$refs.scroll.forceUpdate()
         })
       }
     },
     created() {
-      var that = this
-      this.searchAddr(this.addr).then(function(data) {
-        that.list = data.data.objArr
-        that.scroll.pullDown = true
-        that.scroll.pullUp = true
+      this.searchAddr(this.addr).then(data => {
+        this.list = data.data.objArr
+        this.scroll.pullDown = true
+        this.scroll.pullUp = true
       })
     }
   }

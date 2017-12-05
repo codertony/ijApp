@@ -97,16 +97,16 @@
       return {
         appList: [
           {
-            name: '我的待审',
+            name: '交割日',
             icon: '&#xe60f;',
             color: 'blue',
             link: '/deliveryDay'
           },
           {
-            name: '我的待审',
+            name: '预约验件',
             icon: '&#xe611;',
             color: 'red',
-            link: '/test'
+            link: '/appointmentCheck'
           },
           {
             name: '我的待审',

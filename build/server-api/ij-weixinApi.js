@@ -57,11 +57,10 @@ router.get('/get_wx_access_token', function (req, res, next) {
         // 第三步：拉取用户信息(需scope为 snsapi_userinfo)
         // console.log(JSON.parse(body));
         var data = JSON.parse(body)
-        console.log(access_token)
         console.log(data.UserId)
         /* res.redirect('http://tonycoder.ngrok.cc?userId=' + data.UserId); */
-        res.redirect('http://' + hostUrl + '/?userId=' + data.UserId);
-        /* request.get({
+        /*res.redirect('http://' + hostUrl + '/?userId=' + data.UserId);*/
+        request.get({
             url: 'https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=' + access_token + '&userid=' + data.UserId
           },
           function(error, response, body) {
@@ -77,7 +76,7 @@ router.get('/get_wx_access_token', function (req, res, next) {
               console.log(response.statusCode);
             }
           }
-        ) */
+        )
       } else {
         console.log(response.statusCode);
       }
